@@ -17,21 +17,62 @@ namespace WSite\Gallery\Block;
 
 class Gallery extends \Magento\Framework\View\Element\Template
 {
-    public function _construct() {
+    protected $_galleryModelFactory;
+    protected $_galleryModel;
+    
+    public function __construct(
+        \WSite\Gallery\Model\GalleryFactory $galleryModelFactory,
+        \Magento\Framework\View\Element\Template\Context $context,
+        array $data = array()
+    ) {
+        $this->_galleryModelFactory = $galleryModelFactory;
+        
+        parent::__construct($context, $data);
+    }
+    
+    public function _construct()
+    {
         $this->setTemplate('WSite_Gallery::gallery.phtml');
         
         return parent::_construct();
     }
     
-    public function getTitle() {
-        return '...Title...';
+    public function getModel()
+    {
+        if ($this->_galleryModel) {
+            return $this->_galleryModel;
+        }
+        
+        $id = $this->getId();
+        $identifier = $this->getIdentifier();
+        
+        $galleryModel = $this->_galleryModelFactory->create();
+        
+        if ($id) {
+            $galleryModel->load($id);
+        }
+        
+        if ($identifier) {
+            $galleryModel->load($identifier, 'identifier');
+        }
+        
+        $this->_galleryModel = $galleryModel;
+        
+        return $this->_galleryModel;
     }
     
-    public function getDescription() {
-        return '...Description...';
+    public function getTitle()
+    {
+        return $this->getModel()->getTitle();
     }
     
-    public function getItems() {
-        return [];
+    public function getDescription()
+    {
+        return $this->getModel()->getDescription();
+    }
+    
+    public function getItems()
+    {
+        return $this->getModel()->getItems();
     }
 }

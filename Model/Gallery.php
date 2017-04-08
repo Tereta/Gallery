@@ -17,9 +17,43 @@ namespace WSite\Gallery\Model;
 
 class Gallery extends \Magento\Framework\Model\AbstractModel
 {
+    protected $_itemModelFactory;
+    
+    public function __construct(
+        \Magento\Framework\Model\Context $context,
+        \Magento\Framework\Registry $registry,
+        \WSite\Gallery\Model\Gallery\ItemFactory $itemModelFactory,
+        \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
+        \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
+        array $data = array()
+    ) {
+        $this->_itemModelFactory = $itemModelFactory;
+        
+        parent::__construct(
+            $context,
+            $registry,
+            $resource,
+            $resourceCollection,
+            $data
+        );
+    }
+    
     protected function _construct()
     {
         parent::_construct();
         $this->_init('WSite\Gallery\Model\ResourceModel\Gallery');
+    }
+    
+    public function getItems()
+    {
+        if (!$this->getId()) {
+            return [];
+        }
+        
+        $itemModel = $this->_itemModelFactory->create();
+        $collectionModel = $itemModel->getCollection();
+        $collectionModel->addFieldToFilter('gallery_id', $this->getId());
+        
+        return $collectionModel;
     }
 }
